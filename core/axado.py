@@ -67,25 +67,34 @@ def pega_preco_faixa(tabela, nome, peso):
     return None
 
 
+def calcula_seguro(valor_nota, taxa_seguro):
+    return float(valor_nota * taxa_seguro)/100
+
+
+def calcula_preco_faixa(peso, taxa_faixa):
+    return float(peso * taxa_faixa)
+
+
+def calcula_icms(subtotal, icms):
+    pass
+
+
 def calcula_tabela_um(*params):
     subtotal = 0
     origem, destino, nota, peso = params
     registro_rota = pega_registro_rota('tabela', origem, destino)
     if registro_rota:
         prazo = registro_rota['prazo']
-        subtotal += float(nota * registro_rota['seguro'])/100
+        subtotal += calcula_seguro(nota, registro_rota['seguro'])
         subtotal += registro_rota['fixa']
         preco_faixa = pega_preco_faixa('tabela', registro_rota['kg'], peso)
         # TODO: refatorar para retornar "tabela:-, -" nos casos de excecao listados
         if preco_faixa:
-            pass
+            subtotal += calcula_preco_faixa(peso, preco_faixa)
         else:
             print u"O peso informado não se encaixa em nenhuma faixa de limites de pesos."
     else:
         print u"Não há registros de  disponível para a origem e destino informados."
-
-
-
 
 
 def calcula_tabela_dois():
