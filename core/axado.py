@@ -76,7 +76,7 @@ def calcula_preco_faixa(peso, taxa_faixa):
 
 
 def calcula_icms(subtotal, icms):
-    pass
+    return float(subtotal)/(float(100 - icms) / 100)
 
 
 def calcula_tabela_um(*params):
@@ -91,6 +91,8 @@ def calcula_tabela_um(*params):
         # TODO: refatorar para retornar "tabela:-, -" nos casos de excecao listados
         if preco_faixa:
             subtotal += calcula_preco_faixa(peso, preco_faixa)
+            subtotal = calcula_icms(subtotal, ICMS_FIXO)
+            print round(subtotal, 2)
         else:
             print u"O peso informado não se encaixa em nenhuma faixa de limites de pesos."
     else:
