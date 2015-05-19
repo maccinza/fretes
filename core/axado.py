@@ -19,6 +19,11 @@ TOLERANCIA = 0.01
 RESULTADOS = {}
 
 
+def imprime_resultados():
+    for k in sorted(RESULTADOS.keys()):
+        print "%s:%d, %.2f" % (k, RESULTADOS[k]['prazo'], RESULTADOS[k]['frete'])
+
+
 def constroi_dicionario_de_informacoes(arquivo, delimitador, dicionario_destino, tabela_destino):
     with open(arquivo, 'r') as csv_file:
         rotas = csv.reader(csv_file, delimiter=delimitador)
@@ -88,18 +93,22 @@ def calcula_tabela_um(*params):
         subtotal += calcula_seguro(nota, registro_rota['seguro'])
         subtotal += registro_rota['fixa']
         preco_faixa = pega_preco_faixa('tabela', registro_rota['kg'], peso)
-        # TODO: refatorar para retornar "tabela:-, -" nos casos de excecao listados
+
         if preco_faixa:
             subtotal += calcula_preco_faixa(peso, preco_faixa)
-            subtotal = calcula_icms(subtotal, ICMS_FIXO)
-            print round(subtotal, 2)
+            subtotal = round(calcula_icms(subtotal, ICMS_FIXO), 2)
         else:
-            print u"O peso informado não se encaixa em nenhuma faixa de limites de pesos."
+            prazo = "-"
+            subtotal = "-"
     else:
-        print u"Não há registros de  disponível para a origem e destino informados."
+        prazo = "-"
+        subtotal = "-"
+
+    RESULTADOS['tabela'] = {'prazo': prazo,
+                            'frete': subtotal}
 
 
-def calcula_tabela_dois():
+def calcula_tabela_dois(*params):
     pass
 
 
@@ -108,7 +117,8 @@ def calcula_total(params):
         script, origem, destino, nota, peso = params
         constroi_dicionarios()
         calcula_tabela_um(origem, destino, float(nota), float(peso))
-        #calcula_tabela_dois(origem, destino, nota, peso)
+        calcula_tabela_dois(origem, destino, float(nota), float(peso))
+        imprime_resultados()
 
     except ValueError:
         print u"Erro nos parâmetros de entrada. Verifique a entrada fornecida para o script e tente novamente."
