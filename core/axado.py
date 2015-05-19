@@ -4,7 +4,7 @@ __author__ = 'infante'
 import csv
 import os
 import sys
-from pprint import pprint
+from math import ceil
 
 DIR_BASE = os.path.dirname(os.path.dirname(__file__))
 DIR_TABELAS = os.path.join(DIR_BASE, 'tabelas')
@@ -16,12 +16,21 @@ CSV = ('.csv', ',')
 TSV = ('.tsv', '\t')
 ICMS_FIXO = 6
 TOLERANCIA = 0.01
+CASAS_DECIMAIS = 2
 RESULTADOS = {}
+
+
+def arredonda_para_cima(valor, casas_decimais):
+    return ceil((10**casas_decimais * valor)) / float(10**casas_decimais)
+
+
+def checa_numerico(valor):
+    return reduce(lambda x, y: x and y, [num.isdigit() for num in valor.split(".")])
 
 
 def imprime_resultados():
     for k in sorted(RESULTADOS.keys()):
-        print "%s:%d, %.2f" % (k, RESULTADOS[k]['prazo'], RESULTADOS[k]['frete'])
+        print "%s:%s, %s" % (k, str(RESULTADOS[k]['prazo']), str(RESULTADOS[k]['frete']))
 
 
 def constroi_dicionario_de_informacoes(arquivo, delimitador, dicionario_destino, tabela_destino):
@@ -34,7 +43,7 @@ def constroi_dicionario_de_informacoes(arquivo, delimitador, dicionario_destino,
                 if ind == 0:
                     referencia[i] = v
                 else:
-                    if v.isdigit():
+                    if checa_numerico(v):
                         valores[referencia[i]] = float(v)
                     else:
                         valores[referencia[i]] = v
@@ -72,12 +81,22 @@ def pega_preco_faixa(tabela, nome, peso):
     return None
 
 
+def excede_limite_peso(peso, limite):
+    if peso > limite > 0:
+        return True
+    return False
+
+
 def calcula_seguro(valor_nota, taxa_seguro):
     return float(valor_nota * taxa_seguro)/100
 
 
 def calcula_preco_faixa(peso, taxa_faixa):
     return float(peso * taxa_faixa)
+
+
+def calcula_alfandega(subtotal, alfandega):
+    return subtotal * (float(alfandega) / 100)
 
 
 def calcula_icms(subtotal, icms):
@@ -89,14 +108,14 @@ def calcula_tabela_um(*params):
     origem, destino, nota, peso = params
     registro_rota = pega_registro_rota('tabela', origem, destino)
     if registro_rota:
-        prazo = registro_rota['prazo']
+        prazo = int(registro_rota['prazo'])
         subtotal += calcula_seguro(nota, registro_rota['seguro'])
         subtotal += registro_rota['fixa']
         preco_faixa = pega_preco_faixa('tabela', registro_rota['kg'], peso)
 
         if preco_faixa:
             subtotal += calcula_preco_faixa(peso, preco_faixa)
-            subtotal = round(calcula_icms(subtotal, ICMS_FIXO), 2)
+            subtotal = arredonda_para_cima(calcula_icms(subtotal, ICMS_FIXO), CASAS_DECIMAIS)
         else:
             prazo = "-"
             subtotal = "-"
@@ -109,10 +128,29 @@ def calcula_tabela_um(*params):
 
 
 def calcula_tabela_dois(*params):
-    pass
+    subtotal = 0
+    origem, destino, nota, peso = params
+    registro_rota = pega_registro_rota('tabela2', origem, destino)
+    if excede_limite_peso(peso, registro_rota['limite']):
+        prazo = "-"
+        subtotal = "-"
+    else:
+        prazo = int(registro_rota['prazo'])
+        subtotal += calcula_seguro(nota, registro_rota['seguro'])
+        preco_faixa = pega_preco_faixa('tabela2', registro_rota['kg'], peso)
+        if preco_faixa:
+            subtotal += calcula_preco_faixa(peso, preco_faixa)
+            subtotal += calcula_alfandega(subtotal, registro_rota['alfandega'])
+            subtotal = arredonda_para_cima(calcula_icms(subtotal, registro_rota['icms']), CASAS_DECIMAIS)
+        else:
+            prazo = "-"
+            subtotal = "-"
+
+    RESULTADOS['tabela2'] = {'prazo': prazo,
+                             'frete': subtotal}
 
 
-def calcula_total(params):
+def calcula_prazos_e_valores(params):
     try:
         script, origem, destino, nota, peso = params
         constroi_dicionarios()
@@ -126,4 +164,4 @@ def calcula_total(params):
 
 
 if __name__ == '__main__':
-    calcula_total(sys.argv)
+    calcula_prazos_e_valores(sys.argv)
