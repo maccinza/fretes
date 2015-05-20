@@ -134,7 +134,7 @@ def calcula_tabela_dois(*params):
     subtotal = 0
     origem, destino, nota, peso = params
     registro_rota = pega_registro_rota('tabela2', origem, destino)
-    if excede_limite_peso(peso, registro_rota['limite']):
+    if not registro_rota or excede_limite_peso(peso, registro_rota['limite']):
         prazo = 0
         subtotal = 0
     else:
@@ -161,8 +161,8 @@ def calcula_prazos_e_valores(params):
         calcula_tabela_dois(origem, destino, float(nota), float(peso))
 
     except ValueError:
-        print u"Erro nos parâmetros de entrada. Verifique a entrada fornecida para o script e tente novamente."
-        print u"Uso: python axado.py origem destino valor_nota peso"
+        print u"Erro nos parâmetros de entrada. Verifique a entrada fornecida para o script e tente novamente.\n" \
+              u"Uso: python axado.py origem destino valor_nota peso"
 
 
 def testa_calculos(params):
