@@ -177,18 +177,32 @@ def excede_limite_peso(peso, limite):
 
 
 def calcula_seguro(valor_nota, taxa_seguro):
+    u"""Calcula o valor de seguro a partir do valor da nota e da taxa de seguro informadas."""
+
+    # retorna o resultado do calculo de seguro seguindo a regra de negocio especificada
+    # converte o resultado da multiplicacao para float para evitar divisao inteira (ex.:python 2 -> 5/2 = 2)
     return float(valor_nota * taxa_seguro)/100
 
 
 def calcula_preco_faixa(peso, taxa_faixa):
+    u"""Calcula o preço total de faixa de cobrança dado o peso do item e uma taxa da faixa."""
+
+    # retorna o resultado do calculo de preço total da faixa seguindo a regra de negocio especificada
     return float(peso * taxa_faixa)
 
 
 def calcula_alfandega(subtotal, alfandega):
+    u"""Calcula o valor total de alfândega a ser pago considerando a taxa de alfândega e o valor acumulado de
+    cálculos do frete.
+    """
+
+    # retorna o resultado do calculo do valor de alfândega seguindo a regra de negocio especificada
+    # converte o resultado da multiplicacao para float para evitar divisao inteira (ex.:python 2 -> 5/2 = 2)
     return subtotal * (float(alfandega) / 100)
 
 
 def calcula_icms(subtotal, icms):
+    u"""Calcula o valor final do frete com o cálculo do icms"""
     return float(subtotal)/(float(100 - icms) / 100)
 
 
