@@ -30,7 +30,7 @@ class TestAxado(unittest.TestCase):
 
     def test_flo_saj_75_25(self):
         resultado = {'tabela': {'prazo': 3, 'frete': 271.81}, 'tabela2': {'frete': 388.10, 'prazo': 12}}
-        self.assertEqual(testa_calculos(('florianopolis', 'balneario', '75', '25')), resultado)
+        self.assertEqual(testa_calculos(('florianopolis', 'saojose', '75', '25')), resultado)
 
     def test_flo_pal_80_30(self):
         resultado = {'tabela': {'prazo': 1, 'frete': 163.41}, 'tabela2': {'frete': 447.29, 'prazo': 4}}
@@ -59,7 +59,7 @@ class TestAxado(unittest.TestCase):
 
     def test_bal_flo_110_3(self):
         resultado = {'tabela': {'prazo': 1, 'frete': 81.07}, 'tabela2': {'frete': 29.55, 'prazo': 1}}
-        self.assertEqual(testa_calculos(('fortaleza', 'florianopolis', '105', '35')), resultado)
+        self.assertEqual(testa_calculos(('balneario', 'florianopolis', '110', '3')), resultado)
 
     def test_saj_flo_115_8(self):
         resultado = {'tabela': {'prazo': 4, 'frete': 121.60}, 'tabela2': {'frete': 48.11, 'prazo': 2}}

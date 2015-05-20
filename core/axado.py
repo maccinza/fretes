@@ -167,7 +167,12 @@ def calcula_prazos_e_valores(params):
 
 def testa_calculos(params):
     calcula_prazos_e_valores(params)
-    return RESULTADOS
+    RESULTADOS_TESTE = RESULTADOS
+    for k in sorted(RESULTADOS_TESTE.keys()):
+        for kk in RESULTADOS_TESTE[k].keys():
+            if RESULTADOS_TESTE[k][kk] == 0:
+                RESULTADOS_TESTE[k][kk] = "-"
+    return RESULTADOS_TESTE
 
 if __name__ == '__main__':
     calcula_prazos_e_valores(sys.argv[1:])
