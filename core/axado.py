@@ -190,12 +190,12 @@ def calcula_prazos_e_valores(params):
 
 def testa_calculos(params):
     calcula_prazos_e_valores(params)
-    RESULTADOS_TESTE = RESULTADOS
-    for k in sorted(RESULTADOS_TESTE.keys()):
-        for kk in RESULTADOS_TESTE[k].keys():
-            if RESULTADOS_TESTE[k][kk] == 0:
-                RESULTADOS_TESTE[k][kk] = "-"
-    return RESULTADOS_TESTE
+    resultados_teste = RESULTADOS
+    for k in sorted(resultados_teste.keys()):
+        for kk in resultados_teste[k].keys():
+            if resultados_teste[k][kk] == 0:
+                resultados_teste[k][kk] = "-"
+    return resultados_teste
 
 if __name__ == '__main__':
     calcula_prazos_e_valores(sys.argv[1:])

@@ -2,7 +2,42 @@
 __author__ = 'infante'
 
 import unittest
-from axado import testa_calculos
+from axado import testa_calculos, arredonda_para_cima, checa_numerico, excede_limite_peso,\
+    calcula_seguro, calcula_preco_faixa, calcula_alfandega, calcula_icms
+
+
+class TestAuxiliar(unittest.TestCase):
+
+    def test_arredonda_para_cima(self):
+        resultados = (10.91, 23.245, 0.47)
+        self.assertEqual((arredonda_para_cima(10.9071, 2),
+                          arredonda_para_cima(23.24412, 3),
+                          arredonda_para_cima(0.46127, 2)), resultados)
+
+    def test_checa_numerico(self):
+        valores = ('string', '12.32', '0.225', '1', '10e2', '1000021340000')
+        self.assertEqual([False, True, True, True, False, True], [checa_numerico(v) for v in valores])
+
+    def test_excede_limite_peso(self):
+        valores = ((10.5, 10), (0.25, 1), (0.331, 0), (40, 25))
+        self.assertEqual([True, False, False, True], [excede_limite_peso(v[0], v[1]) for v in valores])
+
+    def test_calculo_seguro(self):
+        valores = ((50, 2), (70, 3), (5.5, 4), (21.5, 6))
+        self.assertEqual([1, 2.1, 0.22, 1.29], [calcula_seguro(v[0], v[1]) for v in valores])
+
+    def test_calcula_preco_faixa(self):
+        valores = ((10.5, 10), (0.25, 1), (70, 3), (40, 25))
+        self.assertEqual([105, 0.25, 210, 1000], [calcula_preco_faixa(v[0], v[1]) for v in valores])
+
+    def test_calcula_alfandega(self):
+        valores = ((50, 2), (70, 3), (5.5, 4), (21.5, 6))
+        self.assertEqual([1, 2.1, 0.22, 1.29], [calcula_alfandega(v[0], v[1]) for v in valores])
+
+    def test_calcula_icms(self):
+        valores = ((50, 2), (70, 3), (5.5, 4), (21.5, 6))
+        self.assertEqual([51.02040816326531, 72.16494845360825, 5.729166666666667, 22.872340425531917],
+                         [calcula_icms(v[0], v[1]) for v in valores])
 
 
 class TestAxado(unittest.TestCase):
