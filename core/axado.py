@@ -30,7 +30,10 @@ def checa_numerico(valor):
 
 def imprime_resultados():
     for k in sorted(RESULTADOS.keys()):
-        print "%s:%s, %s" % (k, str(RESULTADOS[k]['prazo']), str(RESULTADOS[k]['frete']))
+        if RESULTADOS[k]['prazo'] and RESULTADOS[k]['frete']:
+            print "%s:%d, %.2f" % (k, RESULTADOS[k]['prazo'], RESULTADOS[k]['frete'])
+        else:
+            print "%s:-, -" % k
 
 
 def constroi_dicionario_de_informacoes(arquivo, delimitador, dicionario_destino, tabela_destino):
@@ -117,11 +120,11 @@ def calcula_tabela_um(*params):
             subtotal += calcula_preco_faixa(peso, preco_faixa)
             subtotal = arredonda_para_cima(calcula_icms(subtotal, ICMS_FIXO), CASAS_DECIMAIS)
         else:
-            prazo = "-"
-            subtotal = "-"
+            prazo = 0
+            subtotal = 0
     else:
-        prazo = "-"
-        subtotal = "-"
+        prazo = 0
+        subtotal = 0
 
     RESULTADOS['tabela'] = {'prazo': prazo,
                             'frete': subtotal}
@@ -132,8 +135,8 @@ def calcula_tabela_dois(*params):
     origem, destino, nota, peso = params
     registro_rota = pega_registro_rota('tabela2', origem, destino)
     if excede_limite_peso(peso, registro_rota['limite']):
-        prazo = "-"
-        subtotal = "-"
+        prazo = 0
+        subtotal = 0
     else:
         prazo = int(registro_rota['prazo'])
         subtotal += calcula_seguro(nota, registro_rota['seguro'])
@@ -143,8 +146,8 @@ def calcula_tabela_dois(*params):
             subtotal += calcula_alfandega(subtotal, registro_rota['alfandega'])
             subtotal = arredonda_para_cima(calcula_icms(subtotal, registro_rota['icms']), CASAS_DECIMAIS)
         else:
-            prazo = "-"
-            subtotal = "-"
+            prazo = 0
+            subtotal = 0
 
     RESULTADOS['tabela2'] = {'prazo': prazo,
                              'frete': subtotal}
@@ -152,16 +155,20 @@ def calcula_tabela_dois(*params):
 
 def calcula_prazos_e_valores(params):
     try:
-        script, origem, destino, nota, peso = params
+        origem, destino, nota, peso = params
         constroi_dicionarios()
         calcula_tabela_um(origem, destino, float(nota), float(peso))
         calcula_tabela_dois(origem, destino, float(nota), float(peso))
-        imprime_resultados()
 
     except ValueError:
         print u"Erro nos parâmetros de entrada. Verifique a entrada fornecida para o script e tente novamente."
         print u"Uso: python axado.py origem destino valor_nota peso"
 
 
+def testa_calculos(params):
+    calcula_prazos_e_valores(params)
+    return RESULTADOS
+
 if __name__ == '__main__':
-    calcula_prazos_e_valores(sys.argv)
+    calcula_prazos_e_valores(sys.argv[1:])
+    imprime_resultados()
