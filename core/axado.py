@@ -14,10 +14,9 @@ import sys
 from math import ceil
 
 # define caminho para diretorio base do projeto e caminho para o diretorio de tabelas
-DIR_BASE = os.path.dirname(os.path.abspath(__file__))
+DIR_BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIR_TABELAS = os.path.join(DIR_BASE, 'tabelas')
 
-print DIR_BASE
 
 # Inicializa variaveis globais do programa e valores default
 # ROTAS: dicionario com as informacoes coletadas dos arquivos rotas.csv e rotas.tsv
@@ -308,6 +307,9 @@ def calcula_prazos_e_valores(params):
         print u"Erro nos parâmetros de entrada. Verifique a entrada fornecida para o script e tente novamente.\n" \
               u"Uso: python axado.py origem destino valor_nota peso"
 
+    except OSError:
+        # caso arquivos de informacoes nao sejam encontrados, avisa o usuario
+        print u"Arquivos com informações de rotas e preços não foram encontrados no caminho esperado."
 
 def testa_calculos(params):
     u"""Auxilia nos testes realizando chamada para a funcao principal para cálculo dos valores de prazos e fretes,
