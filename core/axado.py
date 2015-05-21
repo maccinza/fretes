@@ -196,64 +196,104 @@ def calcula_alfandega(subtotal, alfandega):
     cálculos do frete.
     """
 
-    # retorna o resultado do calculo do valor de alfândega seguindo a regra de negocio especificada
+    # retorna o resultado do calculo do valor de alfandega seguindo a regra de negocio especificada
     # converte o resultado da multiplicacao para float para evitar divisao inteira (ex.:python 2 -> 5/2 = 2)
     return subtotal * (float(alfandega) / 100)
 
 
 def calcula_icms(subtotal, icms):
-    u"""Calcula o valor final do frete com o cálculo do icms"""
+    u"""Calcula o valor final do frete com o cálculo do icms a partir do valor acumulado e do valor do icms."""
+
+    # retorna o resultado do calculo do valor final do frete seguindo a regra de negocio especificada
+    # utiliza valores convertidos em float para evitar divisao inteira (ex.:python 2 -> 5/2 = 2)
     return float(subtotal)/(float(100 - icms) / 100)
 
 
 def calcula_tabela_um(*params):
+    u"""Calcula prazo e valor de frete para a tabela um."""
+
+    # inicializa subtotal e obtem os parametros de entrada
     subtotal = 0
     origem, destino, nota, peso = params
+    # chama funcao auxiliar que acha o registro de rota da tabela a partir da origem e do destino
     registro_rota = pega_registro_rota('tabela', origem, destino)
+    # caso encontre um registro de rota
     if registro_rota:
+        # obtem o valor do prazo
         prazo = int(registro_rota['prazo'])
+        # acumula o calculo do seguro
         subtotal += calcula_seguro(nota, registro_rota['seguro'])
+        # acumula o valor da taxa fixa
         subtotal += registro_rota['fixa']
+        # obtem o valor de preco da faixa adequada para esta tabela dado o nome da faixa da rota e o peso do item
         preco_faixa = pega_preco_faixa('tabela', registro_rota['kg'], peso)
 
+        # caso tenha encontrado um preco
         if preco_faixa:
+            # acumula o calculo do preco para a faixa
             subtotal += calcula_preco_faixa(peso, preco_faixa)
+            # e acumula o calculo final considerando icms e o arredondamento sempre para cima
             subtotal = arredonda_para_cima(calcula_icms(subtotal, ICMS_FIXO), CASAS_DECIMAIS)
+        # caso contrario, zera os valores de prazo e de valor de frete
         else:
             prazo = 0
             subtotal = 0
+    # caso contrario, zera os valores de prazo e de frete
     else:
         prazo = 0
         subtotal = 0
 
+    # escreve os resultados de prazo e valor de frete para a tabela na variavel global de resultados
     RESULTADOS['tabela'] = {'prazo': prazo,
                             'frete': subtotal}
 
 
 def calcula_tabela_dois(*params):
+    u"""Calcula prazo e valor de frete para a tabela2."""
+
+    # inicializa subtotal e obtem os parametros de entrada
     subtotal = 0
     origem, destino, nota, peso = params
+    # chama funcao auxiliar que acha o registro de rota da tabela2 a partir da origem e do destino
     registro_rota = pega_registro_rota('tabela2', origem, destino)
+    # se nao houver um registro de rota ou o peso do item exceda o limite de peso para a  rota
     if not registro_rota or excede_limite_peso(peso, registro_rota['limite']):
+        # zera os valores de prazo e de frete
         prazo = 0
         subtotal = 0
+    # caso contrario continua calculos
     else:
+        # obtem o valor de prazo para a rota
         prazo = int(registro_rota['prazo'])
+        # acumula calculo do valor do seguro a partir do valor da nota e da taxa de seguro
         subtotal += calcula_seguro(nota, registro_rota['seguro'])
+        # obtem preco por kg da faixa para a tabela2 a partir do nome da faixa do registro de rota e do peso do item
         preco_faixa = pega_preco_faixa('tabela2', registro_rota['kg'], peso)
+        # caso tenha encontrado uma taxa para a faixa da tabela2
         if preco_faixa:
+            # acumula o calculo do preco total da faixa a partir do peso do item e do preco da faixa
             subtotal += calcula_preco_faixa(peso, preco_faixa)
+            # acumula calculo do valor da alfandega a partir do valor acumulado e da taxa de alfandega
             subtotal += calcula_alfandega(subtotal, registro_rota['alfandega'])
+            # e acumula o calculo final considerando icms e o arredondamento sempre para cima
             subtotal = arredonda_para_cima(calcula_icms(subtotal, registro_rota['icms']), CASAS_DECIMAIS)
+        # caso contrario zera os valores de prazo e frete
         else:
             prazo = 0
             subtotal = 0
 
+    # escreve os resultados de prazo e valor de frete para a tabela2 na variavel global de resultados
     RESULTADOS['tabela2'] = {'prazo': prazo,
                              'frete': subtotal}
 
 
 def calcula_prazos_e_valores(params):
+    u"""Realiza as chamadas para as funções de coleta de informações a partir dos parâmetros de entrada e para os
+    cálculos de prazos e fretes para as tabelas
+    """
+
+    # tenta obter os parametros de entrada, montar os dicionarios de dados e calcular os prazos e fretes para
+    # as tabelas
     try:
         origem, destino, nota, peso = params
         constroi_dicionarios()
@@ -261,19 +301,31 @@ def calcula_prazos_e_valores(params):
         calcula_tabela_dois(origem, destino, float(nota), float(peso))
 
     except ValueError:
+        # caso haja algum problema com os parametros de entrada, imprime mensagem
         print u"Erro nos parâmetros de entrada. Verifique a entrada fornecida para o script e tente novamente.\n" \
               u"Uso: python axado.py origem destino valor_nota peso"
 
 
 def testa_calculos(params):
+    u"""Auxilia nos testes realizando chamada para a funcao principal para cálculo dos valores de prazos e fretes,
+    organiza e retorna o dicionário de resultados
+    """
+
+    # realiza os calculos a partir dos parametros de entrada
     calcula_prazos_e_valores(params)
+    # copia o dicionario de resultados e verifica se existe algum valor de prazo ou frete igual a 0
     resultados_teste = RESULTADOS
     for k in sorted(resultados_teste.keys()):
         for kk in resultados_teste[k].keys():
+            # em caso positivo, substitui o valor pelo valor esperado na saida
             if resultados_teste[k][kk] == 0:
                 resultados_teste[k][kk] = "-"
+    # retorna dicionario de resultados
     return resultados_teste
 
 if __name__ == '__main__':
+    # caso o modulo tenha sido chamado da linha de comando, remove o nome do modulo dos parametros de entrada
+    # e passa os demais parametros como entrada para a funcao que calcula os valores de prazos e fretes
     calcula_prazos_e_valores(sys.argv[1:])
+    # imprime os resultados armazenados na variavel global de resultados
     imprime_resultados()
