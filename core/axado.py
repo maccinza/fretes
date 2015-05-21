@@ -14,8 +14,10 @@ import sys
 from math import ceil
 
 # define caminho para diretorio base do projeto e caminho para o diretorio de tabelas
-DIR_BASE = os.path.dirname(os.path.dirname(__file__))
+DIR_BASE = os.path.dirname(os.path.abspath(__file__))
 DIR_TABELAS = os.path.join(DIR_BASE, 'tabelas')
+
+print DIR_BASE
 
 # Inicializa variaveis globais do programa e valores default
 # ROTAS: dicionario com as informacoes coletadas dos arquivos rotas.csv e rotas.tsv
